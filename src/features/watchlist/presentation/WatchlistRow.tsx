@@ -52,8 +52,9 @@ export const WatchlistRow = memo(({
           Renders itself; all tick updates bypass React completely.
           The flash animation runs via ValueAnimator on the native side.
         */}
-        <TickDataView symbol={symbol} style={rowStyles.tickDataView} />
-
+        
+       <TickDataView symbol={symbol} style={rowStyles.tickDataView} />
+       
         {__DEV__ && (
           <View style={rowStyles.devBadges}>
             {/* React render count — stays at 1 after mount (proves no re-render) */}
@@ -90,8 +91,10 @@ const rowStyles = StyleSheet.create({
   },
   left:  { flex: 1 },
   tickDataView: {
-    alignItems: 'flex-end',
-    minWidth:   110,
+    // Explicit height required — Yoga cannot infer height from native children
+    // of a requireNativeComponent view. 40dp fits price (16sp) + change (12sp).
+    width:  120,
+    height: 40,
   },
   devBadges: {
     flexDirection: 'row',

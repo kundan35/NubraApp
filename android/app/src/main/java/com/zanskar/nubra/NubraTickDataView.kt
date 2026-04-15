@@ -5,6 +5,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.view.Gravity
 import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatTextView
 
@@ -31,22 +32,27 @@ class NubraTickDataView(context: Context) : LinearLayout(context) {
 
     init {
         orientation = VERTICAL
+        gravity     = Gravity.END   // right-align column to match original design
+
+        val wrapWrap = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
 
         priceView.apply {
             setTextColor(Color.parseColor("#F1EFE8"))
-            textSize   = 16f
-            typeface   = Typeface.DEFAULT_BOLD
-            text       = "—"
+            textSize  = 16f
+            typeface  = Typeface.DEFAULT_BOLD
+            gravity   = Gravity.END
+            text      = "—"
         }
 
         changeView.apply {
             setTextColor(Color.parseColor("#888780"))
-            textSize   = 12f
-            text       = ""
+            textSize = 12f
+            gravity  = Gravity.END
+            text     = ""
         }
 
-        addView(priceView)
-        addView(changeView)
+        addView(priceView,  wrapWrap)
+        addView(changeView, wrapWrap)
     }
 
     fun setSymbol(newSymbol: String) {
