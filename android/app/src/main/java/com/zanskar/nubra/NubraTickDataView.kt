@@ -24,9 +24,10 @@ import androidx.appcompat.widget.AppCompatTextView
  */
 class NubraTickDataView(context: Context) : LinearLayout(context) {
 
-    private val priceView  = AppCompatTextView(context)
-    private val changeView = AppCompatTextView(context)
-    private var symbol: String = ""
+    private val priceView    = AppCompatTextView(context)
+    private val changeView   = AppCompatTextView(context)
+    private var symbol:        String         = ""
+    private var flashAnimator: ValueAnimator? = null
 
     init {
         orientation = VERTICAL
@@ -70,11 +71,17 @@ class NubraTickDataView(context: Context) : LinearLayout(context) {
             if (isUp) Color.parseColor("#1D9E75") else Color.parseColor("#E24B4A")
         )
 
-        // Native flash animation — no Animated API, no React involvement
-        val flashColor = if (isUp) Color.parseColor("#331D9E75")
-                         else      Color.parseColor("#33E24B4A")
+        // Native flash animation — no Animated API, no React involvement.
+        // Cancel any in-flight animator before starting a new one so rapid ticks
+        // don't stack up and fight over setBackgroundColor.
+        // End color uses the same hue with alpha=0 (not Color.TRANSPARENT which is
+        // transparent BLACK) — ArgbEvaluator interpolates all channels, so fading
+        // to #00000000 would darken mid-animation instead of cleanly fading out.
+        val flashStart = if (isUp) Color.parseColor("#331D9E75") else Color.parseColor("#33E24B4A")
+        val flashEnd   = if (isUp) Color.parseColor("#001D9E75") else Color.parseColor("#00E24B4A")
 
-        ValueAnimator.ofObject(ArgbEvaluator(), flashColor, Color.TRANSPARENT).apply {
+        flashAnimator?.cancel()
+        flashAnimator = ValueAnimator.ofObject(ArgbEvaluator(), flashStart, flashEnd).apply {
             duration = 600
             addUpdateListener { setBackgroundColor(it.animatedValue as Int) }
             start()
