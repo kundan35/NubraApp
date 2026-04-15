@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import type { ITickRepository } from '../domain/repositories/ITickRepository';
 import type { RawTick }         from '@core/performance/TickStoreAccessor';
+import { TickCountView }        from './TickCountView';
 
 export interface WatchlistRowProps {
   symbol:         string;
@@ -131,8 +132,13 @@ export const WatchlistRow = memo(({
         </View>
 
         {__DEV__ && (
-          <View style={rowStyles.devBadge}>
-            <Text style={rowStyles.devText}>{renderCountRef.current}</Text>
+          <View style={rowStyles.devBadges}>
+            {/* React render count — stays at 1 after first tick (proves no re-render) */}
+            <View style={rowStyles.devBadge}>
+              <Text style={rowStyles.devText}>r:{renderCountRef.current}</Text>
+            </View>
+            {/* Native Fabric tick count — increments without React re-rendering */}
+            <TickCountView symbol={symbol} style={rowStyles.tickCountView} />
           </View>
         )}
       </TouchableOpacity>
@@ -190,12 +196,24 @@ const rowStyles = StyleSheet.create({
   },
   up:   { color: '#1D9E75' },
   down: { color: '#E24B4A' },
+  devBadges: {
+    flexDirection: 'row',
+    alignItems:    'center',
+    gap:           4,
+    marginLeft:    8,
+  },
   devBadge: {
-    marginLeft:        8,
     backgroundColor:   '#1A1A2E',
     borderRadius:      3,
     paddingHorizontal: 4,
     paddingVertical:   2,
   },
   devText: { fontSize: 9, color: '#6060AA', fontVariant: ['tabular-nums'] },
+  tickCountView: {
+    minWidth:          52,
+    height:            16,
+    backgroundColor:   '#1A2E1A',
+    borderRadius:      3,
+    paddingHorizontal: 4,
+  },
 });

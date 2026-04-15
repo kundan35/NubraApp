@@ -168,6 +168,14 @@ class NubraMarketWebSocketModule(
         scheduleNextWatchlistTick(symbolList)
     }
 
+    /**
+     * getTickCount(symbol) — TurboModule method.
+     * Returns how many ticks have been received for a symbol.
+     * Callable synchronously from JS via the New Architecture pipeline.
+     */
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun getTickCount(symbol: String): Int = TickCountRegistry.getCount(symbol)
+
     /** Stops the watchlist mock feed (called by the UI start/stop toggle). */
     @ReactMethod
     fun stopWatchlistFeed() {
@@ -300,6 +308,8 @@ class NubraMarketWebSocketModule(
                 change    = change,
                 changePct = chgPct,
             )
+            // Notify Fabric view directly — bypasses React render cycle
+            TickCountRegistry.incrementSymbol(sym)
         }
     }
 

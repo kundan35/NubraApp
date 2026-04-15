@@ -8,10 +8,10 @@ import com.facebook.react.uimanager.ViewManager
 class NubraMarketWebSocketPackage : ReactPackage {
 
     override fun createNativeModules(
-        ctx: ReactApplicationContext
+        ctx: ReactApplicationContext,
     ): List<NativeModule> = listOf(NubraMarketWebSocketModule(ctx))
 
     override fun createViewManagers(
-        ctx: ReactApplicationContext
-    ): List<ViewManager<*, *>> = emptyList()
+        ctx: ReactApplicationContext,
+    ): List<ViewManager<*, *>> = listOf(NubraTickCountViewManager())
 }
