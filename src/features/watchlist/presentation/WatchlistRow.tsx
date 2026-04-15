@@ -55,16 +55,14 @@ export const WatchlistRow = memo(({
         
        <TickDataView symbol={symbol} style={rowStyles.tickDataView} />
        
-        {__DEV__ && (
-          <View style={rowStyles.devBadges}>
-            {/* React render count — stays at 1 after mount (proves no re-render) */}
-            <View style={rowStyles.devBadge}>
-              <Text style={rowStyles.devText}>r:{renderCountRef.current}</Text>
-            </View>
-            {/* Native Fabric tick count — increments without React re-rendering */}
-            <TickCountView symbol={symbol} style={rowStyles.tickCountView} />
+        <View style={rowStyles.devBadges}>
+          {/* React render count — stays at 1 after mount (proves no re-render) */}
+          <View style={rowStyles.devBadge}>
+            <Text style={rowStyles.devText}>r:{renderCountRef.current}</Text>
           </View>
-        )}
+          {/* Native Fabric tick count — increments without React re-rendering */}
+          <TickCountView symbol={symbol} style={rowStyles.tickCountView} />
+        </View>
       </TouchableOpacity>
     </View>
   );
