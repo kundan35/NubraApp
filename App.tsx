@@ -1,45 +1,48 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import React, { useEffect } from 'react';
 import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+  StatusBar,
+  StyleSheet,
+} from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { di } from '@core/di/container';
+import { AppNavigator } from '@features/navigation/AppNavigator';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+export default function App() {
+  useEffect(() => {
+    // Verify New Architecture is active
+    const isNewArch = (global as any).RN$Bridgeless === true;
+    if (__DEV__) {
+      console.log(
+        isNewArch
+          ? '[Nubra] New Architecture (JSI + Fabric) active'
+          : '[Nubra] WARNING: Legacy bridge — check android/gradle.properties'
+      );
+    }
+
+    // Initialise DI container at app start
+    di.initialise();
+
+    return () => {
+      di.dispose();
+    };
+  }, []);
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
+      <SafeAreaView style={styles.root}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="#e09494"
+        />
+        <AppNavigator />
+      </SafeAreaView>
     </SafeAreaProvider>
   );
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
+    backgroundColor: '#0D0D0D',
   },
 });
-
-export default App;

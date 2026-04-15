@@ -1,8 +1,21 @@
 {
-  "extends": "@react-native/typescript-config",
+  "extends": "@react-native/typescript-config/tsconfig.json",
   "compilerOptions": {
-    "types": ["jest"]
+    "strict": true,
+    "target": "esnext",
+    "module": "commonjs",
+    "lib": ["esnext"],
+    "jsx": "react-native",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@core/*":     ["src/core/*"],
+      "@features/*": ["src/features/*"],
+      "@infra/*":    ["src/infrastructure/*"]
+    }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["**/node_modules", "**/Pods"]
+  "include": ["src", "index.js", "App.tsx"],
+  "exclude": ["node_modules", "android", "ios"]
 }
