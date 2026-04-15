@@ -29,8 +29,8 @@ export const WatchlistScreen = memo(({ onSymbolSelect }: Props) => {
   if (!storeRef.current) {
     storeRef.current = di.createWatchlistViewModel();
   }
-  // Stable singleton — injected from DI, never re-created
-  const tickRepo  = useRef(di.tickRepository).current;
+  // tickRepo is only needed by InstrumentDetailSheet (graph rAF loop)
+  const tickRepo = useRef(di.tickRepository).current;
 
   const state    = storeRef.current((s: WatchlistViewModelStore) => s.state);
   const dispatch = storeRef.current((s: WatchlistViewModelStore) => s.dispatch);
@@ -61,10 +61,8 @@ export const WatchlistScreen = memo(({ onSymbolSelect }: Props) => {
     ({ item }: ListRenderItemInfo<WatchlistItem>) => (
       <WatchlistRow
         symbol={item.symbol}
-        basePrice={item.basePrice}
         isSelected={item.symbol === selectedSymbol}
         onPress={handleRowPress}
-        tickRepository={tickRepo}
       />
     ),
     [selectedSymbol, handleRowPress],

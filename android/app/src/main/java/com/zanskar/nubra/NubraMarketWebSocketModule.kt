@@ -308,8 +308,9 @@ class NubraMarketWebSocketModule(
                 change    = change,
                 changePct = chgPct,
             )
-            // Notify Fabric view directly — bypasses React render cycle
+            // Notify Fabric views directly — bypasses React render cycle entirely
             TickCountRegistry.incrementSymbol(sym)
+            TickCountRegistry.updateTick(sym, state.spot, change, chgPct)
         }
     }
 

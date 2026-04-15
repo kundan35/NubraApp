@@ -6,40 +6,70 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * TickCountRegistry — process-wide singleton.
  *
- * Tracks how many ticks each symbol has received and holds weak
- * references to any mounted NubraTickCountView for that symbol.
+ * Tracks how many ticks each symbol has received and holds references to
+ * any mounted Fabric native views for that symbol.
  *
- * When incrementSymbol() is called from the mock-feed thread,
- * it posts a direct UI update to the matching view — completely
- * bypassing React's render cycle. That is the Fabric demonstration:
- * the native view text changes while the React render count stays at 1.
+ * Two view types are tracked:
+ *  - NubraTickCountView : shows "ticks: N" counter
+ *  - NubraTickDataView  : shows live LTP + change, replaces React setTick state
+ *
+ * When incrementSymbol() / updateTick() are called from the mock-feed thread,
+ * they post direct UI updates to the matching views — completely bypassing
+ * React's render cycle.  That is the core Fabric demonstration:
+ *   • r:1 stays at 1 (no React re-render)
+ *   • ticks:N increments natively
+ *   • price + change update natively
  */
 object TickCountRegistry {
 
-    // Tick count per symbol — thread-safe
-    private val counts = ConcurrentHashMap<String, AtomicInteger>()
+    // ── Tick counter ───────────────────────────────────────────────────────
 
-    // One view per symbol (the mounted NubraTickCountView)
-    private val views = ConcurrentHashMap<String, NubraTickCountView>()
+    private val counts = ConcurrentHashMap<String, AtomicInteger>()
 
     /** Called from mock-feed thread for every tick written. */
     fun incrementSymbol(symbol: String) {
         val count = counts.getOrPut(symbol) { AtomicInteger(0) }
             .incrementAndGet()
-        // Direct native update — no JS bridge, no React setState
-        views[symbol]?.post { views[symbol]?.updateCount(count) }
+        countViews[symbol]?.post { countViews[symbol]?.updateCount(count) }
+        // Also update price view if mounted — same tick event
     }
 
+    fun getCount(symbol: String): Int = counts[symbol]?.get() ?: 0
+
+    // ── NubraTickCountView registry ────────────────────────────────────────
+
+    private val countViews = ConcurrentHashMap<String, NubraTickCountView>()
+
     fun registerView(symbol: String, view: NubraTickCountView) {
-        views[symbol] = view
-        // Show current count immediately when view mounts
+        countViews[symbol] = view
         val current = counts[symbol]?.get() ?: 0
         view.updateCount(current)
     }
 
     fun unregisterView(symbol: String, view: NubraTickCountView) {
-        views.remove(symbol, view)
+        countViews.remove(symbol, view)
     }
 
-    fun getCount(symbol: String): Int = counts[symbol]?.get() ?: 0
+    // ── NubraTickDataView registry ─────────────────────────────────────────
+
+    private val priceViews = ConcurrentHashMap<String, NubraTickDataView>()
+
+    fun registerPriceView(symbol: String, view: NubraTickDataView) {
+        priceViews[symbol] = view
+    }
+
+    fun unregisterPriceView(symbol: String, view: NubraTickDataView) {
+        priceViews.remove(symbol, view)
+    }
+
+    /**
+     * Called from emitWatchlistTicks() on the mock-feed thread.
+     * Posts a direct native update to the mounted NubraTickDataView — no JS,
+     * no bridge, no React setState.
+     */
+    fun updateTick(symbol: String, ltp: Double, change: Double, changePct: Double) {
+        priceViews[symbol]?.post {
+            priceViews[symbol]?.updateTick(ltp, change, changePct)
+        }
+    }
 }

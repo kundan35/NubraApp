@@ -13,5 +13,8 @@ class NubraMarketWebSocketPackage : ReactPackage {
 
     override fun createViewManagers(
         ctx: ReactApplicationContext,
-    ): List<ViewManager<*, *>> = listOf(NubraTickCountViewManager())
+    ): List<ViewManager<*, *>> = listOf(
+        NubraTickCountViewManager(),
+        NubraTickDataViewManager(),
+    )
 }
